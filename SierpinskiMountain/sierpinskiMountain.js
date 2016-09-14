@@ -9,32 +9,50 @@ var triangles = [];
 
 var ITERATIONS = 12;
 
+function startMountain(textArea)
+{
+    ITERATIONS =  Number(textArea.value);
+    triangles = [];
+
+
+    for(var i =0; i < ITERATIONS; ++i)
+    {
+        triangles = getTriangles();
+    }
+}
+
 function getTriangles()
 {
     var temp = [];
-    for(var i = 0; i < triangles.length/3; ++i)
+    for(var i = 0; i < triangles.length; i+=3)
     {
         temp = temp.concat(getNextTriangle(i));
     }
     return temp;
 }
 
-function getNexTriangle(i)
+function getNextTriangle(i)
 {
-    var bisectIndices;
+    var bisectIndices=[];
     bisectIndices.push(getBisectIndex(i,i+1));
     bisectIndices.push(getBisectIndex(i+1,i+2));
     bisectIndices.push(getBisectIndex(i+2,i));
-    return bisectIndices;
+    var newTriangles = [
+        vec3(i,bisectIndices[0],bisectIndices[2]), //top triangle
+        vec3(bisectIndices[0],i+1,bisectIndices[1]), //bottom left
+        vec3(bisectIndices[2],bisectIndices[1],i+2), //bottom right
+        vec3(bisectIndices[0],bisectIndices[1],bisectIndices[2])//middle
+    ];
+    return newTriangles;
 }
 
 function getBisectIndex(i,j)
 {
-    if(bisections[(i, j)])
+    if(bisections[(i, j)] != undefined)
     {
         return bisections[(i,j)];
     }
-    else if(bisections[(j, i)])
+    else if(bisections[(j, i)] != undefined)
     {
         return bisections[(j, i)];
     }
@@ -44,12 +62,29 @@ function getBisectIndex(i,j)
         bisections[(i,j)] = bisections[(j,i)] = vertices.length - 1;
     }
 }
+
+function bisect(i,j)
+{
+    var temp = vec3((i[0]+j[0])/2,(i[1]+j[1])/2,(i[2]+j[2])/2);
+    var length = getDist(i,j);
+    length = length * .1;
+    for(var k = 0; k < 3; ++k)
+    {
+        temp[k] += (Math.random() - .5);
+    }
+    return temp;
+}
+
+function getDist(i,j)
+{
+    return Math.sqrt(Math.pow(j[0]-i[0],2)+Math.pow(j[1]-i[1],2)+Math.pow(j[2]-i[2],2));
+}
 /// APPLICATION ENTRY POINT ///
 window.onload = function init()
 {
     // Retrieve HTML elements
     var canvas = document.getElementById( "gl-canvas" );
-    var textArea = document.getElementById("DCIterations");
+    var textArea = document.getElementById("SMIterations");
     // var directionArea = document.getElementById("DCDirection");
 
     // Initialize gl
@@ -59,11 +94,11 @@ window.onload = function init()
     var bufferId = gl.createBuffer();
 
     // Set click function to change number of iterations
-    document.getElementById("DCRefresh").onclick = function(){
-        runDragon(textArea, bufferId); render();};
+    document.getElementById("SMRefresh").onclick = function(){
+        triangles = getTriangles(); render();};
 
-    // Execute Dragon Curve
-    runDragon(textArea, bufferId);
+    // Execute sierpinskiMountain
+    triangles = getTriangles();
 
     //
     //  Configure WebGL
