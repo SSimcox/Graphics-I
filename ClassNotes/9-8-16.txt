@@ -1,0 +1,33 @@
+9/8/2016
+
+Lindenmeyer systems: Koch Snowflake: ----- -> --^--...
+
+Fractals made from Lindenmeyer systems.
+
+an L-system works with string replacement (turtle graphics)
+
+F moves forward drawing a line, + rotates positive angle(clockwiase), - rotates negative angle(counter-clockwise)
+x,y do nothing for drawing, but create the curve
+
+Dragon curve:
+
+Initial: Fx
+Rules: 	x -> x+yF+
+		y -> -Fx-y
+Rotation: 45deg
+
+Ex: Fx -> Fx+yF+ -> Fx+yF++-Fx-yF+
+
+Each two iterations of the dragon curve draws half the length (each iteration is sqrt(2))
+
+-----------------------
+
+Each primitive is made of points and topology(optional)
+Topology: Relationship between points. i.e. the graph of points remains the same.
+The geometry may change throughout the graphics pipeline but the topology will not.
+
+-----------------------
+
+Hoomogenous Point Systems
+
+x,y,z,w where w is 1 or 0. If it is zero the vector is a direction, else it is a point.

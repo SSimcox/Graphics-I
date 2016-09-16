@@ -7,6 +7,19 @@ var vertices = [];
 var bisections = [];
 var triangles = [];
 
+var startVertices = [
+    vec3(0,1,0),//top
+    vec3(-1,0,0),//left
+    vec3(1,0,0),//right
+    vec3(0,0,-1)//bottom
+];
+
+var startTriangles =[
+    vec3(0,1,2),
+    vec3(0,2,3),
+    vec3(0,3,1)
+];
+
 var ITERATIONS = 12;
 
 function startMountain(textArea)
@@ -98,7 +111,9 @@ window.onload = function init()
         triangles = getTriangles(); render();};
 
     // Execute sierpinskiMountain
-    triangles = getTriangles();
+    //triangles = getTriangles();
+
+
 
     //
     //  Configure WebGL

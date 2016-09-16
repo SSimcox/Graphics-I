@@ -129,6 +129,7 @@ window.onload = function init()
 
 function render()
 {
-    //gl.clear( gl.COLOR_BUFFER_BIT );
+    console.log(vertices.length);
+    gl.clear( gl.COLOR_BUFFER_BIT );
     gl.drawArrays( gl.LINE_STRIP, 0, vertices.length);
 }

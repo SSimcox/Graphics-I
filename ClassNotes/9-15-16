@@ -1,0 +1,43 @@
+Peer Reviews: I am going to adopt this practice OR I think you can improve in this place by ____.
+These comments must be actionable like the aforementioned examples...
+
+Homogeneous Coordinates (projective):
+- A coordinate system where multiplying a point by a scalar does not change the meaning of the coordinates
+- Requires on extra coordinate than the number of dimensions that can be represented
+- Can distinguish between direction and points
+x,y,z,w is the coordinate system always (this semester).
+
+Barycentric Coordinates:
+- Two dimensional projective(homogeneous) coordinate system for triangles
+- Used to interpolate fragment shader
+
+Take a point in a triangle, the three segments created by the connection of that point are alpha, beta, and gama.
+0 < a,b,g < 1
+
+z = angle of rotation
+dx = x cos(z) - y sin(z)
+dy = y sin(z) + y cos(z)
+
+Translation and Rotation are Rigid Body Transformations:
+Never change the shape or volume of the transformed object
+
+Symmetrical scaling is important to not change the shape.
+Uses for non-symmetrical scaling: Ellipsoid. Make a sphere, Scale on direction more
+Negative scaling gives a reflection
+Shear? Moves some points farther based on their distance from some axis:
+
+1 cot(z) 0 0
+0  1     0 0
+0  0     1 0 shears x with respect to distance in y
+0  0     0 1
+
+Perspective? Make things farther away smaller
+
+Three coordinate systems:
+- Object (0,0) is center of mass
+- World (0,0) is center of world
+- View (0,0) is center of the view
+
+The solution to Gimbal Lock: Quaternion rotation
+quaternions have three imaginary parts and one real part (a + bi + cj + dk)
+i^2=j^2=k^2=ijk=-1

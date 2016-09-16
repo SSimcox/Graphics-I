@@ -1,0 +1,34 @@
+-----------------------
+|ALL COMPUTER PROGRAMS|
+-----------------------
+Input ----------------------------------------------> Process --> Output
+  ^                                                                  |
+  |                                                                  V
+Keyboard(keys up and dow)                                         Pixel Buffer(RGB/ GRAYSCALE)
+Mouse(button up and down/ loc(x,y))
+Joysticks(6 degrees of freedom, but we won't use)
+
+
+Normal Programs: Input --> CPU --> Output
+Graphics: Input --> CPU --> GPU --------------> Output
+                         ^					^
+						 |                  |
+					Small Bandwidth      LARGE Bandwidth
+					
+Colors will be not 0-255, but 0.0 - 1.0
+
+Object is the -- object! Image is just a specific view of that object.
+Manipulation of object is done on CPU
+Manipulation of image is done on GPU(vertex/fragment shading)
+
+Tesselation -> Geometry -> Vertex -> Clipping -> Rasterizer -> Fragment 
+
+Tesselation shader and geometry shader in OpenGL 4.0+(not supported in WebGL)
+Vertex shader is the first shader(program) that we will write on the GPU, it outputs the change in the vertex
+Fragment shader is the next we write and it outputs a color
+Simplest forms of shaders is pass through
+
+Hold Triangle points in a Vertex Buffer, hold Indices in a Index Buffer
+Memoize midpoint calculations
+
+Recommended fragment shader: darken as y goes down/up
