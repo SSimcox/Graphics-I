@@ -5,7 +5,7 @@
 var gl;
 var vertices = [];
 
-var ITERATIONS = 12;
+var ITERATIONS = 16;
 var direction = 0;
 
 //Gets Next string of dragon curve
@@ -30,29 +30,39 @@ function walkInput(input, length)
 {
     var vertices = [];
     direction = ((((Math.floor(ITERATIONS/2) % 4) - 4) * -1) + 1) % 4;// 0 = right, 1 = down, 2 = left, 3 = up
+    var angleDirection;
+    switch(direction)
+    {
+        case 0: angleDirection = 0;
+            break;
+        case 1: angleDirection = 270;
+            break;
+        case 2: angleDirection = 180;
+            break;
+        case 3: angleDirection = 90;
+    }
+    if (ITERATIONS % 2 == 1)
+        angleDirection += 45;
     vertices.push(vec2(-.5,0));
     for(var i = 0; i < input.length; ++i)
     {
         if(input[i] == "f")
         {
             var currentPoint = vertices[vertices.length-1];
-            var whichWay;
-            if(direction == 0) whichWay = vec2(length,0);
-            else if(direction == 1) whichWay = vec2(0, length * -1);
-            else if(direction == 2) whichWay = vec2(length * -1, 0);
-            else if(direction == 3) whichWay = vec2(0, length);
+            var dx = Math.cos(radians(angleDirection)) * length;
+            var dy = Math.sin(radians(angleDirection))* length;
+            var whichWay = vec2(dx,dy);
+
             var newPoint = add(currentPoint, whichWay);
             vertices.push(newPoint);
         }
         else if(input[i] == "+")
         {
-            direction = direction + 1;
-            if(direction > 3) direction = 0;
+            angleDirection -= 90;
         }
         else
         {
-            direction = direction - 1;
-            if(direction < 0) direction = 3;
+            angleDirection += 90;
         }
     }
     return vertices;

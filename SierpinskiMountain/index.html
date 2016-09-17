@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>Hello Triangle</title>
+        <title>Sierpinski Mountain</title>
 
         <script type="text/javascript" src="Boilerplate/webgl-utils.js"></script>
         <script type="text/javascript" src="Boilerplate/initShaders2.js"></script>
@@ -10,15 +10,15 @@
         <script type="text/javascript" src="sierpinskiMountain.js"></script>
     </head>
 
-    <body>
-        <canvas id="gl-canvas" width="512" height="512">
-        Oops ... your browser doesn't support the HTML5 canvas element
-        </canvas>
-        <div>
-            Iterations (Max: 20)
-            <input id="SMIterations" type="text" label="Iterations"  name="Iterations" value="2">
-            <!--<input id="DCDirection" type="text"  name="Direction"value="0">-->
-            <input id="SMRefresh" type="button" value="Refresh Image">
+    <body style="width: 100%">
+        <div style="margin: 0 auto">
+            <canvas id="gl-canvas" width="512" height="512">
+            Oops ... your browser doesn't support the HTML5 canvas element
+            </canvas>
+            <div>
+                <input id="SMIterations" type="text" label="Iterations"  name="Iterations" value="6">
+                <input id="SMRefresh" type="button" value="Refresh Image">
+            </div>
         </div>
     </body>
 

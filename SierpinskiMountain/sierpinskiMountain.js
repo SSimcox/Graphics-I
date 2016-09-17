@@ -6,18 +6,37 @@ var gl;
 var vertices = [];
 var bisections = [];
 var triangles = [];
+var theta = 0;
+var rotationLoc;
 
 var startVertices = [
-    vec3(0,1,0),//top
-    vec3(-1,0,0),//left
-    vec3(1,0,0),//right
-    vec3(0,0,-1)//bottom
+    vec3(   0, .75, 0),//top
+    vec3(-.75,-.75, 0),//left
+    vec3(   0,   -.75,  .75),//front
+    vec3( .75,-.75, 0),//right
+    vec3(   0,   -.75, -.75)//bottom
 ];
 
 var startTriangles =[
-    vec3(0,1,2),
-    vec3(0,2,3),
-    vec3(0,3,1)
+    0,1,2,
+    0,2,3,
+    0,3,4,
+    0,4,1
+];
+
+var startVerticesB = [
+    vec3(   0, .75, -1.0),//top
+    vec3(-.75,-.75, -1.0),//left
+    vec3( .75,-.75, -1.0),//right
+    vec3(   0,   -.75,-1.5),//bottom
+    vec3(   0,   0,  -.5)
+];
+
+var startTrianglesB =[
+    0,1,2,
+    0,2,3,
+    0,3,4,
+    0,4,1
 ];
 
 var ITERATIONS = 12;
@@ -25,7 +44,8 @@ var ITERATIONS = 12;
 function startMountain(textArea)
 {
     ITERATIONS =  Number(textArea.value);
-    triangles = [];
+    vertices = startVertices;
+    triangles = startTriangles;
 
 
     for(var i =0; i < ITERATIONS; ++i)
@@ -41,19 +61,19 @@ function getTriangles()
     {
         temp = temp.concat(getNextTriangle(i));
     }
-    return temp;
+    return flatten(temp);
 }
 
 function getNextTriangle(i)
 {
-    var bisectIndices=[];
-    bisectIndices.push(getBisectIndex(i,i+1));
-    bisectIndices.push(getBisectIndex(i+1,i+2));
-    bisectIndices.push(getBisectIndex(i+2,i));
+    var bisectIndices = [];
+    bisectIndices[0] = getBisectIndex(triangles[i], triangles[i+1]);
+    bisectIndices[1] = getBisectIndex(triangles[i+1],triangles[i+2]);
+    bisectIndices[2] = getBisectIndex(triangles[i+2],triangles[i]);
     var newTriangles = [
-        vec3(i,bisectIndices[0],bisectIndices[2]), //top triangle
-        vec3(bisectIndices[0],i+1,bisectIndices[1]), //bottom left
-        vec3(bisectIndices[2],bisectIndices[1],i+2), //bottom right
+        vec3(triangles[i],bisectIndices[0],bisectIndices[2]), //top triangle
+        vec3(bisectIndices[0],triangles[i+1],bisectIndices[1]), //bottom left
+        vec3(bisectIndices[2],bisectIndices[1],triangles[i+2]), //bottom right
         vec3(bisectIndices[0],bisectIndices[1],bisectIndices[2])//middle
     ];
     return newTriangles;
@@ -61,29 +81,36 @@ function getNextTriangle(i)
 
 function getBisectIndex(i,j)
 {
-    if(bisections[(i, j)] != undefined)
+    if(bisections[i] != undefined && bisections[i][j] != undefined)
     {
-        return bisections[(i,j)];
+        return bisections[i][j];
     }
-    else if(bisections[(j, i)] != undefined)
+    else if(bisections[j] != undefined &&bisections[j][i] != undefined)
     {
-        return bisections[(j, i)];
+        return bisections[j][i];
     }
     else
     {
-        vertices.push(bisect(i,j));
-        bisections[(i,j)] = bisections[(j,i)] = vertices.length - 1;
+        if(bisections[i] == undefined) {
+            bisections[i] = [];
+        }
+        if(bisections[j] == undefined) {
+            bisections[j] = [];
+        }
+        vertices.push(bisect(vertices[i],vertices[j]));
+        bisections[i][j] = bisections[j][i] = vertices.length - 1;
+        return bisections[i][j];
     }
 }
 
 function bisect(i,j)
 {
-    var temp = vec3((i[0]+j[0])/2,(i[1]+j[1])/2,(i[2]+j[2])/2);
+    var temp = [(i[0]+j[0])/2,(i[1]+j[1])/2,(i[2]+j[2])/2];
     var length = getDist(i,j);
     length = length * .1;
     for(var k = 0; k < 3; ++k)
     {
-        temp[k] += (Math.random() - .5);
+        temp[k] += (Math.random() - .5) * length;
     }
     return temp;
 }
@@ -98,22 +125,24 @@ window.onload = function init()
     // Retrieve HTML elements
     var canvas = document.getElementById( "gl-canvas" );
     var textArea = document.getElementById("SMIterations");
-    // var directionArea = document.getElementById("DCDirection");
 
     // Initialize gl
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" );}
-    // Initialize bufferId for vertices
-    var bufferId = gl.createBuffer();
 
     // Set click function to change number of iterations
     document.getElementById("SMRefresh").onclick = function(){
-        triangles = getTriangles(); render();};
+        startMountain(textArea); gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(flatten(vertices)), gl.STATIC_DRAW );
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(flatten(triangles)), gl.STATIC_DRAW); rerender();};
 
+
+    startMountain(textArea);
     // Execute sierpinskiMountain
     //triangles = getTriangles();
 
-
+    gl.enable(gl.DEPTH_TEST);
+    // Near things obscure far things
+    gl.depthFunc(gl.LEQUAL);
 
     //
     //  Configure WebGL
@@ -127,18 +156,51 @@ window.onload = function init()
     gl.useProgram( program );
 
     // Load the data into the GPU
-
-    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
+    var vertexBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(flatten(vertices)), gl.STATIC_DRAW );
+    var indicesBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(flatten(triangles)), gl.STATIC_DRAW);
     // Associate out shader variables with our data buffer
     var vPos = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPos, 2, gl.FLOAT, false, 0, 0 );
+    gl.vertexAttribPointer( vPos, 3, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPos );
+    rotationLoc = gl.getUniformLocation(program, "rotation");
+    console.log(triangles.length/3);
     render();
 };
 
 function render()
 {
-    gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.drawArrays( gl.LINE_STRIP, 0, vertices.length);
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    // gl.drawArrays( gl.LINE_STRIP, 0, vertices.length);
+    theta += 2.0;
+
+    var angle = radians( theta );
+    var c = Math.cos( angle );
+    var s = Math.sin( angle );
+
+
+    gl.uniform2fv(rotationLoc, vec2(c,s));
+
+    gl.drawElements(gl.TRIANGLES, triangles.length ,gl.UNSIGNED_SHORT,0);
+
+    requestAnimFrame(render);
+}
+
+function rerender()
+{
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    // gl.drawArrays( gl.LINE_STRIP, 0, vertices.length);
+    // theta += 2.0;
+
+    var angle = radians( theta );
+    var c = Math.cos( angle );
+    var s = Math.sin( angle );
+
+
+    gl.uniform2fv(rotationLoc, vec2(c,s));
+
+    gl.drawElements(gl.TRIANGLES, triangles.length ,gl.UNSIGNED_SHORT,0);
 }
