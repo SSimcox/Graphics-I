@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
         <title>Dragon Curve</title>
 
+        <link rel="stylesheet" type="text/css" href="../graphics.css">
         <script type="text/javascript" src="./Boilerplate/webgl-utils.js"></script>
         <script type="text/javascript" src="./Boilerplate/initShaders2.js"></script>
         <script type="text/javascript" src="./Boilerplate/MV.js"></script>
@@ -12,10 +13,12 @@
     </head>
 
     <body>
-        <canvas id="gl-canvas" width="512" height="512">
-        Oops ... your browser doesn't support the HTML5 canvas element
-        </canvas>
-        <div>
+    <h1>Dragon Curve</h1>
+    <h2>Steven Simcox</h2>
+        <div class="mainCanvas">
+            <canvas id="gl-canvas" width="512" height="512">
+                Oops ... your browser doesn't support the HTML5 canvas element
+            </canvas>
             Iterations (Max: 20, Evens look best)
             <input id="DCIterations" type="text" label="Iterations"  name="Iterations" value="16">
             <!--<input id="DCDirection" type="text"  name="Direction"value="0">-->
