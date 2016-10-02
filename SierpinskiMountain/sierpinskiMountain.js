@@ -153,6 +153,9 @@ window.onload = function init()
     //  Load shaders and initialize attribute buffers
     var program = initShaders( gl, "./shaders/vshader.glsl",
         "./shaders/fshader.glsl" );
+
+    // var program = initShaders( gl, "./shaders/shader.js",
+    //     "./shaders/shader.js" );
     gl.useProgram( program );
 
     // Load the data into the GPU

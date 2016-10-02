@@ -1,0 +1,71 @@
+---------------------
+-------VIEWING-------
+---------------------
+
+3 ways of communicating between CPU to GPU
+- Attributes: attribute vec4 vPosition
+- uniform: uniform float rotationAngle
+- varying: varying vec4 color
+        - Output from vertex shader/ input to fragment shader
+
+Talking about projections!
+- All projections will be made by rank deficient matrices
+
+Simplest projection is orthographic:
+- Projectors are perpendicular to projection plane
+- Projectors are parallel to one another and another major axis
+- Orthographic projection preserves distance and angles
+
+matrix :     1 0 0 0
+             0 1 0 0
+             0 0 0 0
+             0 0 0 0
+
+Axonometric: Not perpendicular to a major axis(x,y, or z)
+Isometric: Distances are preserved, All three dimensions are preserved at the same length
+Dimetric: Only two dimensions are preserved
+Oblique: Projectors are all co-parallel
+
+PERSPECTIVE PROJECTIONS
+Vanishing points!!!
+
+All projectors intersect at the view point.
+Farther objects have smaller view angles which shrinks the object from the viewers PERSPECTIVE
+Look angle determines number of vanishing points. Math determines this for us.
+
+OpenGL camera is flexible, WebGL camera is fixed.
+Because camera is fixed we move the scene (inversely)
+
+- u-v-n coordinate system
+- Up, view, normal vectors.
+Up is the up direction from the camera, view is the vector to where to look, and normal is their cross-product.
+
+Shadows in graphics is hard, making concessions and assumptions making it easier
+- Two shaders, one renders shadows, one renders the real stuff.
+- Does not draw shadows that belong on other objects
+
+This brings up multi pass rendering:
+First pass is just getting distances from light source and closest object
+This creates a shadow map.
+
+
+
+
+COMPUTING EQUIVALENCE RELATIONS (AWESOME ALGORITHM):
+Union Find = O(1*) *O(A-1(n))
+
+Find(a)
+    if(M(a) == a) return a;
+    else
+    {
+        a = Find(M(a));
+        return a;
+    }
+
+Union(a,b)
+    var c = Find(a)
+    var d = Find(b)
+    M(c) = M(d);
+
+
+

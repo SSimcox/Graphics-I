@@ -1,0 +1,52 @@
+--------------
+---LIGHTING---
+--------------
+
+BDRF???
+Bi-Directional Reflection Function
+
+Light source -> Object (Reflection angle) -> Look angle
+
+This is way too much to handle.
+
+FAKE IT!!!
+
+1. Easiest!: AMBIENT LIGHT
+    Non-zero light from every where at all times.
+    Light = Light Source + Ambience
+    How much ambience? Enough for the scene.
+    This removes certain lighting effects (like shadows, which we'll use shadow maps for)
+
+    Ambient light + reflection(mirror-like lighting, specular) + diffuse lighting (Lambertian)
+    x = angle of normal of the surface to light source
+    r = half angle between view angle and normal
+    L = A + specular + cos(x)(I)
+    L = A + specular + (N dot L)(I)
+
+    Material Matrix:
+    A_r D_r S_r
+    A_g D_g S_g : Everything should be the same so we have a single vector (R,G,B)T
+    A_b D_b S_b
+
+Types of sources:
+    Point sources: Emitting in all directions from a single point: Direction = vector subtract
+    Distant light: All light from this source is parallel because it is so far away. Direction = direction given.
+    Area light: A real life light that doesn't work well in GPU graphics.
+
+Point: Color, Position
+Distance: Color, Direction
+Ambient light: Color (Direction if you want consistency, of 0,0,0,0)
+
+P = A * M_a + C_l * M_d * diffuse + C_l * M_s * specular
+
+Flat shading: Normal calculated by cross product of two legs of the triangle
+Gourand shading (per vertex): Causes interpolation to smooth over vertices. Vertex normal is average of normals of faces
+Phong(per fragment) shading: Calc normals, interpolate normals, do lighting per fragment
+
+JAVASCRIPT:
+Uniforms: Ambient, Light sources
+
+Varying: Vertex Normal, Vertex material
+
+Vertex shader(Gourand)/Fragment Shader(Phong):
+Compute lighting information.
