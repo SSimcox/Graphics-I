@@ -1,0 +1,53 @@
+html {
+    font-size-adjust: 100%;
+}
+
+body {
+    height: 100vh;
+    background-color: red;
+    background-image: linear-gradient(to bottom, white, rgba(80,80,255, 1));
+}
+
+a:link, a:visited, a:hover,  a:active  {
+    color:inherit;
+    background-color:transparent;
+    text-decoration:none
+}
+
+h1{
+    background-color: #065870;
+    margin: 50px 0px 0px 50px;
+    color: #3abbe2;
+}
+
+h2{
+    background-color: #065870;
+    margin: 0px 0px 0px 50px;
+    padding-left: 20px;
+    color: #3abbe2;
+}
+
+canvas {
+    margin: 0px auto;
+}
+
+.gameList {
+    display: flex;
+    justify-content: space-around;
+}
+
+
+.gameName {
+    display: inline-block;
+    font-size: 2em;
+    text-decoration: none;
+    background-color: rgba(80,255, 80, 1);
+}
+
+.mainCanvas {
+    width: 512px;
+    margin: 0px auto;
+    border: ridge 10px indianred;
+    box-shadow: 10px 10px 5px #888888;
+    align-content: center;
+}
