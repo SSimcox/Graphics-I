@@ -4,22 +4,28 @@
 var vertices = [];
 var wallIndex = [];
 function generateVertices() {
+    vertices = [];
     for(var i = 0; i < dimension + 1; i++)
     {
-        var r = Math.random();
         var g = Math.random();
         var b = Math.random();
         for(let j = 0; j < dimension + 1; j++)
         {
             vertices.push(vec3(j,0,-i));
-            vertices.push(vec3(r,g,b));
+            vertices.push(vec3(0.0,g,b));
             vertices.push(vec3(j,1,-i));
-            vertices.push(vec3(r,g,b))
+            vertices.push(vec3(0.0,g,b))
         }
     }
+    vertices[(dimension + 1)**2 * 4 - 1] = vec3(1.0, 0.0, 0.0);
+    vertices[(dimension + 1)**2 * 4 - 3] = vec3(1.0, 0.0, 0.0);
+
+    vertices[(dimension + 1)**2 * 4 - 1 - ((dimension + 1) * 4)] = vec3(1.0, 0.0, 0.0);
+    vertices[(dimension + 1)**2 * 4 - 3 - ((dimension + 1) * 4)] = vec3(1.0, 0.0, 0.0);
 }
 
 function createWalls() {
+    wallIndex = [];
     for(let i = 0; i < dimension; i++)
     {
         for(let j = 0; j < dimension; j++)
@@ -45,6 +51,11 @@ function createWalls() {
                 wallIndex.push(me + augDimension, me, me + augDimension + 1, me, me + 1, me + augDimension + 1)
         }
     }
+    // Add Floor
+    wallIndex.push(0, dimension*(dimension + 1) * 2, dimension * 2);
+    wallIndex.push(dimension * (dimension + 1) * 2, dimension * (dimension + 1) * 2 + dimension *2, dimension * 2);
+
+    // Avoid color vecs
     for(let i = 0; i < wallIndex.length; i++)
     {
         wallIndex[i] = wallIndex[i] * 2;

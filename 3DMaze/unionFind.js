@@ -4,7 +4,6 @@
 
 var maze = [];
 var paths = [];
-var dimension = 3;
 
 class Cell {
     constructor(val){
@@ -111,8 +110,7 @@ function makePath(r,s){
     }
 }
 
-function fillPath()
-{
+function fillPath() {
     var dimension = maze.length**.5;
     for(let i = 0; i < dimension; ++i)
     {
@@ -128,7 +126,8 @@ function fillPath()
 }
 
 function genPaths() {
-
+    maze = [];
+    paths = [];
     for (let i = 0; i < dimension**2; ++i) {
         var c = new Cell(i);
         maze.push(c);
@@ -136,8 +135,6 @@ function genPaths() {
         paths[i].push("closed");
         paths[i].push("closed")
     }
-
-    printMaze(maze);
 
     for (let i = 0; i < dimension**2 - 1; ++i) {
         var r = Math.floor(Math.random() * dimension**2);
@@ -169,13 +166,7 @@ function genPaths() {
         makePath(r,s,maze,paths)
     }
 
-
-    console.log("Prefill");
-    console.log();
-    printMaze(maze);
     fillPath(maze,paths);
-    console.log("Postfill");
-    console.log();
-    printMaze(maze);
+
     printMazePath(maze,paths)
 }
