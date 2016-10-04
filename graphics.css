@@ -31,6 +31,10 @@ canvas {
     margin: 0px auto;
 }
 
+input{
+    margin: 5px;
+}
+
 .gameList {
     display: flex;
     justify-content: space-around;
@@ -51,3 +55,4 @@ canvas {
     box-shadow: 10px 10px 5px #888888;
     align-content: center;
 }
+

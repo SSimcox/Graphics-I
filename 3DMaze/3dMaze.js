@@ -22,9 +22,9 @@ var otherLoc = vec3(5.5,5,5);
 var otherDest = vec3(5.5,.5,-5);
 var otherUp = vec3(0,1,-1);
 
-var beginToggled = true;
+var beginToggled = false;
 
-var fp = false;
+var fp = !beginToggled;
 var keys = [false,false,false,false];
 
 function toggleView(){
@@ -41,10 +41,8 @@ function toggleView(){
     console.log(fp);
 }
 
-function runMaze(textArea){
-    dimension = Number(textArea.value);
-
-    loc = vec3(.5,.5,.5);
+function resetVars(){
+    loc = vec3(.5,.5,0);
     dest = add(loc, vec3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))));
     up = vec3(0,1,0);
 
@@ -53,6 +51,8 @@ function runMaze(textArea){
     otherDest = vec3(dimension / 2,.5,-5);
     otherUp = vec3(0,1,-1);
 
+    lookAtDegree = -90;
+
     if(!fp) {
         beginToggled = true;
         fp = ! fp;
@@ -60,6 +60,12 @@ function runMaze(textArea){
     else{
         beginToggled = false;
     }
+}
+
+function runMaze(textArea){
+    dimension = Number(textArea.value);
+    resetVars();
+
     genPaths();
     generateVertices();
     createWalls();
@@ -83,7 +89,6 @@ window.onload = function init()
     var refreshButton = document.getElementById("MazeRemake");
     toggleViewButton.addEventListener("click", toggleView);
     refreshButton.addEventListener("click", function (){runMaze(textArea)});
-    // var directionArea = document.getElementById("DCDirection");
 
     // Initialize gl
     gl = WebGLUtils.setupWebGL( canvas );
@@ -91,13 +96,15 @@ window.onload = function init()
     // Initialize bufferId for vertices
     bufferId = gl.createBuffer();
     indicesBuffer = gl.createBuffer();
+
+    // Run Algorithms
     runMaze(textArea);
 
     //
     //  Configure WebGL
     //
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
+    gl.clearColor( 0.6, 0.8, 1.0, 1.0 );
 
     //  Load shaders and initialize attribute buffers
     var program = initShaders( gl, "./shaders/vshader.glsl",
@@ -129,24 +136,26 @@ window.onload = function init()
 
 function press(event)
 {
-    console.log("Press");
-    console.log(event.keyCode);
     if (event.keyCode === 37) {
         keys[0] = true;
+        event.preventDefault();
     }
-    else if(event.keyCode === 38)
+    else if(event.keyCode === 38){
         keys[1] = true;
+        event.preventDefault();
+    }
     else if(event.keyCode === 39){
         keys[2] = true;
+        event.preventDefault();
     }
-    else if(event.keyCode === 40)
+    else if(event.keyCode === 40) {
         keys[3] = true;
-    console.log(keys);
+        event.preventDefault();
+    }
 }
 
 function unPress(event)
 {
-    console.log("Unpress");
     if (event.keyCode === 37) {
         keys[0] = false;
     }
@@ -189,21 +198,20 @@ function move(val)
 function render()
 {
     if (keys[0]) {
-        if(fp) lookAtDegree--;
+        if(fp) lookAtDegree-=2.5;
         turn("left");
-        console.log("keys[0]");
     }
     else if(keys[1])
         move(1);
     else if(keys[2]){
-        if(fp)lookAtDegree++;
+        if(fp)lookAtDegree+=2.5;
         turn();
     }
     else if(keys[3])
         move(-1);
 
     // First person
-    var pers = perspective(45,1,0.001, 20);
+    var pers = perspective(45,1,0.01, 20);
     var look = lookAt(loc, dest, up);
     // var identity = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
     var transform = mult(pers,look);
@@ -214,3 +222,5 @@ function render()
 
     requestAnimFrame(render);
 }
+
+//TODO: Location tracker and collision management
