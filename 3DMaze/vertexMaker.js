@@ -7,7 +7,7 @@ function generateVertices() {
     vertices = [];
     for(var i = 0; i < dimension + 1; i++)
     {
-        var g = Math.random();
+        var g = 0.0;//Math.random();
         var b = Math.random();
         for(let j = 0; j < dimension + 1; j++)
         {

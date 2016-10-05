@@ -2,28 +2,23 @@
  * Created by Steven on 9/9/2016.
  */
 
-var gl;
-var bufferId;
-var indicesBuffer;
-var viewTransform;
-var dimension = 9;
-
-var s = .1;
+var dimension;
+var s = 0.1;
 var scaleMatrix = mat3(s,0,0,0,s,0,0,0,s);
-
+var currentCellValue = 0;
 // First Person
-var lookAtDegree = -90;
-var loc = vec3(.5,.5,.5);
-var dest = add(loc, vec3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))));
-var up = vec3(0,1,0);
-
+var lookAtDegree;
+var otherLAD;
+var loc;
+var dest;
+var up;
 // Bird's eye
-var otherLoc = vec3(5.5,5,5);
-var otherDest = vec3(5.5,.5,-5);
-var otherUp = vec3(0,1,-1);
-
+var otherLoc;
+var otherDest;
+var otherUp;
+var otherPers;
+var pers;
 var beginToggled = false;
-
 var fp = !beginToggled;
 var keys = [false,false,false,false];
 
@@ -31,28 +26,40 @@ function toggleView(){
     var tempLoc = otherLoc;
     var tempDest = otherDest;
     var tempUp = otherUp;
+    var tempPers = otherPers;
+    var tempLAD = otherLAD;
+
     otherLoc = loc;
     otherDest = dest;
     otherUp = up;
+    otherPers = pers;
+    otherLAD = lookAtDegree;
+
     loc = tempLoc;
     dest = tempDest;
     up = tempUp;
+    pers = tempPers;
+    lookAtDegree = tempLAD;
+
     fp = !fp;
-    console.log(fp);
 }
 
-function resetVars(){
-    loc = vec3(.5,.5,0);
-    dest = add(loc, vec3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))));
-    up = vec3(0,1,0);
-
-// Bird's eye
-    otherLoc = vec3(dimension / 2,5,5);
-    otherDest = vec3(dimension / 2,.5,-5);
-    otherUp = vec3(0,1,-1);
+function resetVars(textArea){
+    dimension = Number(textArea.value);
 
     lookAtDegree = -90;
+    loc = vec3(.5,.5,-0.1);
+    dest = add(loc, vec3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))));
+    up = vec3(0,1,0);
+    pers = perspective(120,1,0.01, dimension);
 
+// Bird's eye
+    otherLAD = -90;
+    otherLoc = vec3(dimension / 2,dimension / 1.25, dimension / 2);
+    otherDest = vec3(dimension / 2,.5, -dimension / 2);
+    otherUp = vec3(0,1,-1);
+    otherPers = perspective(60,1,0.01, dimension*2);
+    document.getElementById("target-cell").innerHTML = "Target Cell: " + (dimension**2-1).toString();
     if(!fp) {
         beginToggled = true;
         fp = ! fp;
@@ -63,79 +70,19 @@ function resetVars(){
 }
 
 function runMaze(textArea){
-    dimension = Number(textArea.value);
-    resetVars();
+    resetVars(textArea);
 
     genPaths();
     generateVertices();
     createWalls();
-    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(flatten(wallIndex)), gl.STATIC_DRAW);
+    setGLVars();
 
     if(beginToggled)
         toggleView();
 }
 
-/// APPLICATION ENTRY POINT ///
-window.onload = function init()
-{
-    // Retrieve HTML elements
-    var canvas = document.getElementById( "gl-canvas" );
-    var textArea = document.getElementById("MazeCells");
-    var toggleViewButton = document.getElementById("toggle-bird");
-    var refreshButton = document.getElementById("MazeRemake");
-    toggleViewButton.addEventListener("click", toggleView);
-    refreshButton.addEventListener("click", function (){runMaze(textArea)});
 
-    // Initialize gl
-    gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { alert( "WebGL isn't available" );}
-    // Initialize bufferId for vertices
-    bufferId = gl.createBuffer();
-    indicesBuffer = gl.createBuffer();
-
-    // Run Algorithms
-    runMaze(textArea);
-
-    //
-    //  Configure WebGL
-    //
-    gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.6, 0.8, 1.0, 1.0 );
-
-    //  Load shaders and initialize attribute buffers
-    var program = initShaders( gl, "./shaders/vshader.glsl",
-        "./shaders/fshader.glsl" );
-    gl.useProgram( program );
-    gl.enable(gl.DEPTH_TEST);
-    // Near things obscure far things
-    gl.depthFunc(gl.LEQUAL);
-    // Load the data into the GPU
-
-
-
-    // Associate our shader variables with our data buffer
-    viewTransform = gl.getUniformLocation(program, "transform");
-
-    var vPos = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPos, 3, gl.FLOAT, false, 12, 0 );
-    gl.enableVertexAttribArray( vPos );
-
-    var vCol = gl.getAttribLocation( program, "myColor" );
-    gl.vertexAttribPointer( vCol, 3, gl.FLOAT, false, 12, 12 );
-    gl.enableVertexAttribArray( vCol );
-
-    window.onkeydown = press;
-    window.onkeyup = unPress;
-    render();
-};
-
-
-function press(event)
-{
+function press(event) {
     if (event.keyCode === 37) {
         keys[0] = true;
         event.preventDefault();
@@ -154,8 +101,7 @@ function press(event)
     }
 }
 
-function unPress(event)
-{
+function unPress(event) {
     if (event.keyCode === 37) {
         keys[0] = false;
     }
@@ -168,50 +114,60 @@ function unPress(event)
         keys[3] = false;
 }
 
-function turn(dir)
-{
-    var i = dir === "left" ? -1:1;
-    console.log("Turn");
+function turn(dir, val) {
     if(fp)
         dest = add(loc, vec3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))));
     else{
-        dest = add(dest, vec3(i,0,0));
-        loc = add(loc, vec3(i,0,0));
+        var i = dir === "side" ? val : 0;
+        var j = dir === "up" ? val : 0;
+        dest = add(dest, vec3(i,0,j));
+        loc = add(loc, vec3(i,0,j));
     }
 }
 
-function move(val)
-{
-    console.log("Move");
+function move(val) {
+    var tempLoc;
     if(val < 0) {
-        loc = subtract(loc, mult(scaleMatrix,mat3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))))[0]);
-        console.log(loc);
+        tempLoc = subtract(loc, mult(scaleMatrix,mat3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))))[0]);
     }
     else {
-        loc = add(loc, mult(scaleMatrix,mat3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))))[0]);
-        console.log(loc);
+        tempLoc = add(loc, mult(scaleMatrix,mat3(Math.cos(radians(lookAtDegree)), 0, Math.sin(radians(lookAtDegree))))[0]);
     }
-    if(fp)
-        turn();
+    if(fp){
+        var tempCell = location(tempLoc);
+        if(tempCell < 0) {}
+        else if(currentCellValue != tempCell){
+            switch (tempCell - currentCellValue){
+                case 1: loc = paths[currentCellValue][0] === "open" ? tempLoc : loc;
+                    break;
+                case -1: loc = paths[tempCell][0] === "open" ? tempLoc : loc;
+                    break;
+                case dimension: loc = paths[currentCellValue][1] === "open" ? tempLoc : loc;
+                    break;
+                case -dimension: loc = paths[tempCell][1] === "open" ? tempLoc : loc;
+                    break;
+            }
+        }
+        else loc = tempLoc;
+    }
+    turn("up",-val);
 }
 
-function render()
-{
+function render() {
     if (keys[0]) {
         if(fp) lookAtDegree-=2.5;
-        turn("left");
+        turn("side", -1);
     }
     else if(keys[1])
         move(1);
     else if(keys[2]){
         if(fp)lookAtDegree+=2.5;
-        turn();
+        turn("side", 1);
     }
     else if(keys[3])
         move(-1);
 
     // First person
-    var pers = perspective(45,1,0.01, 20);
     var look = lookAt(loc, dest, up);
     // var identity = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
     var transform = mult(pers,look);
@@ -219,8 +175,17 @@ function render()
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, wallIndex.length ,gl.UNSIGNED_SHORT,0);
-
+    setCell();
     requestAnimFrame(render);
 }
 
 //TODO: Location tracker and collision management
+function location(pos){
+    return dimension * + Math.floor(-pos[2]) + Math.floor(pos[0]);
+}
+
+function setCell()
+{
+    currentCellValue = location(loc);
+    currentCell.innerHTML = "Current Cell: " + currentCellValue.toString();
+}

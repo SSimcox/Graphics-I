@@ -70,6 +70,7 @@ function printMazePath(){
 }
 
 function makePath(r,s){
+    if(find(maze[r]) === find(maze[s])) return;
     if(r < s)
     {
         if(r == s-1)
@@ -136,7 +137,7 @@ function genPaths() {
         paths[i].push("closed")
     }
 
-    for (let i = 0; i < dimension**2 - 1; ++i) {
+    for (let i = 0; i < dimension**3 - 1; ++i) {
         var r = Math.floor(Math.random() * dimension**2);
         var s = 0;
         do{

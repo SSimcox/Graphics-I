@@ -12,6 +12,7 @@
         <script type="text/javascript" src="./unionFind.js"></script>
         <script type="text/javascript" src="./vertexMaker.js"></script>
         <script type="text/javascript" src="./3dMaze.js"></script>
+        <script type="text/javascript" src="./main.js"></script>
     </head>
 
     <body >
@@ -21,10 +22,15 @@
             <canvas id="gl-canvas" width="512" height="512">
                 Oops ... your browser doesn't support the HTML5 canvas element
             </canvas>
+            <div>Width of the maze. (Max is )</div>
             <input id="MazeCells" type="text" label="Dimensions"  name="Dimensions" value="9">
             <!--<input id="DCDirection" type="text"  name="Direction"value="0">-->
             <input id="MazeRemake" type="button" value="Refresh Image">
             <input id="toggle-bird" type="button" value="Toggle Bird's eye view">
+        </div>
+        <div id="location-div" class="mainCanvas">
+            <p id="current-cell"></p><br/>
+            <p id="target-cell"></p>
         </div>
     </body>
 
